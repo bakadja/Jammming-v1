@@ -14,14 +14,19 @@ const style = {
   backgroundColor: "background.paper",
 };
 
-function Tracklist({ tracks = [], onAdd, actionIcon = "add" }) {
+function Tracklist({ tracks = [], onAdd, actionIcon = "add" , title}) {
   return (
     <List sx={style}>
       {tracks.map((track) => (
-        <>
-          <Track key={track.id} track={track} onAdd={onAdd}  actionIcon={actionIcon}/>
+        <div key={track.id}>
+          <Track
+            track={track}
+            onAdd={onAdd}
+            actionIcon={actionIcon}
+            title={title}
+          />
           <Divider />
-        </>
+        </div>
       ))}
     </List>
   );

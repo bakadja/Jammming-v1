@@ -3,8 +3,8 @@ import { Stack, TextField, Button } from '@mui/material';
 
 export default function SearchBar() {
   return (
-    <Stack spacing={2} direction="column">
-      <TextField label="Enter A Song Title" />
+    <Stack spacing={2} direction="column" sx={{alignItems: "center"}}>
+      <TextField label="Enter A Song Title" sx={{ width: "50%" }} />
       <Button
         variant="contained"
         color="primary"

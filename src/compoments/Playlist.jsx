@@ -19,7 +19,7 @@ function Playlist({ playlistTracks = [], onRemoveTrack, onNameChange, onSave }) 
       </Typography> */}
 
       <TextField
-        fullWidth
+        // fullWidth
         label="Playlist Name"
         variant="filled"
         onChange={(e) => onNameChange(e.target.value)}
@@ -29,6 +29,7 @@ function Playlist({ playlistTracks = [], onRemoveTrack, onNameChange, onSave }) 
         tracks={playlistTracks}
         onAdd={onRemoveTrack}
         actionIcon="remove"
+        title="remove from playlist"
       />
 
       <Button variant="contained" color="primary" onClick={onSave}>

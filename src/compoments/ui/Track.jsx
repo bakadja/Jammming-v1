@@ -4,13 +4,13 @@ import { ListItem, IconButton, ListItemText, Typography} from '@mui/material'
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 
-function Track({ track, onAdd, actionIcon }) {
+function Track({ track, onAdd, actionIcon, title }) {
     const ActionIcon = actionIcon === "add" ? AddIcon : RemoveIcon;
   return (
     <ListItem
       key={track.id}
       secondaryAction={
-        <IconButton title='add to playlist' edge="end" onClick={() => onAdd(track)}>
+        <IconButton title={title} edge="end" onClick={() => onAdd(track)}>
           <ActionIcon />
         </IconButton>
       }

@@ -21,7 +21,7 @@ export default function SearchResults({tracks = []}) {
       >
         Results
       </Typography>
-      <Tracklist tracks={tracks}/>
+      <Tracklist tracks={tracks} title="add to playlist" />
     </Box>
   );
 }
