@@ -1,9 +1,9 @@
+/* eslint-disable react/prop-types */
 import React from "react";
 import Tracklist from "./ui/Tracklist";
 import { Typography, Box } from "@mui/material";
 
-
-export default function SearchResults({tracks = []}) {
+const SearchResults = React.memo(function SearchResults({ tracks = [], onAdd }) {
   return (
     <Box
       sx={{
@@ -21,7 +21,9 @@ export default function SearchResults({tracks = []}) {
       >
         Results
       </Typography>
-      <Tracklist tracks={tracks} title="add to playlist" />
+      <Tracklist tracks={tracks} title="add to playlist" onAdd={onAdd} />
     </Box>
   );
-}
+});
+
+export default SearchResults;

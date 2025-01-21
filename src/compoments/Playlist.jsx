@@ -3,7 +3,7 @@ import React from 'react'
 import { Box, Typography, TextField, Button } from '@mui/material'
 import Tracklist from './ui/Tracklist'
 
-function Playlist({ playlistTracks = [], onRemoveTrack, onNameChange, onSave }) {
+function Playlist({ playlistTracks = [], onRemove, onNameChange, onSave }) {
   return (
     <Box
       sx={{
@@ -27,12 +27,12 @@ function Playlist({ playlistTracks = [], onRemoveTrack, onNameChange, onSave }) 
 
       <Tracklist
         tracks={playlistTracks}
-        onAdd={onRemoveTrack}
+        onAdd={onRemove}
         actionIcon="remove"
         title="remove from playlist"
       />
 
-      <Button variant="contained" color="primary" onClick={onSave}>
+      <Button variant="contained" color="primary" onClick={onSave} disabled={!playlistTracks.length}>
         SAVE TO SPOTIFY
       </Button>
     </Box>

@@ -5,29 +5,29 @@ import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 import { Box, CssBaseline, CircularProgress } from "@mui/material";
 import MainContent from "./MainContent";
-import { useAuth } from "../hooks/useAuth";
-import { useDatabase } from "../hooks/useDatabase";
-import Authentification from "./ui/Authentification";
+// import { useAuth } from "../hooks/useAuth";
+// import { useDatabase } from "../hooks/useDatabase";
+//import Authentification from "./ui/Authentification";
 
 function App() {
-  const { isAuthenticated, token, login } = useAuth();
-  const { isInitialized, db } = useDatabase();
-  console.log("isAuthenticated [App]", isAuthenticated);
+  // const { isAuthenticated, token, login } = useAuth();
+  // const { isInitialized, db } = useDatabase();
+  // console.log("isAuthenticated [App]", isAuthenticated);
 
 
-  // Si pas authentifié, afficher la page de connexion
-  if (!isAuthenticated) {
-    return <Authentification login={login} />;
-  }
+  // // Si pas authentifié, afficher la page de connexion
+  // if (!isAuthenticated) {
+  //   return <Authentification login={login} />;
+  // }
 
-  // Si la base de données n'est pas initialisée, afficher le chargement
-  if (!isInitialized) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
+  // // Si la base de données n'est pas initialisée, afficher le chargement
+  // if (!isInitialized) {
+  //   return (
+  //     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+  //       <CircularProgress />
+  //     </Box>
+  //   );
+  // }
 
   return (
     <Box
@@ -40,7 +40,8 @@ function App() {
       }}
     >
       <CssBaseline />
-      <MainContent token={token} db={db} />
+      {/* <MainContent token={token} db={db} /> */}
+      <MainContent />
     </Box>
   );
 }
