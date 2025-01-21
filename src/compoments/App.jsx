@@ -34,9 +34,11 @@ function App() {
       sx={{
         display: "flex",
         flexDirection: "column",
-        minHeight: "100vh",
-        height: "100%",
-        width: "70vw",
+        minHeight: "50vh",
+        maxHeight: "100vh",
+        minWidth: "50vw",
+        maxWidth: "100vw",
+        gap: "1rem",
       }}
     >
       <CssBaseline />

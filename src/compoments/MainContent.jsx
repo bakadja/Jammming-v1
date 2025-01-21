@@ -10,6 +10,7 @@ function MainContent() {
   const [playlistTracks, setPlaylistTracks] = React.useState([]);
   console.log("tracks:", tracks.length);
 
+  // TODO : ne pas ajouter un morceau déjà présent dans la playlist
   const addTrack = React.useCallback((track) => {
     console.log("onAdd", track);
     if (!playlistTracks.includes(track)) {
