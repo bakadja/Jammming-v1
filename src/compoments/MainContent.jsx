@@ -10,12 +10,14 @@ function MainContent() {
   const [playlistTracks, setPlaylistTracks] = React.useState([]);
   console.log("tracks:", tracks.length);
 
-  // TODO : ne pas ajouter un morceau déjà présent dans la playlist
   const addTrack = React.useCallback((track) => {
-    console.log("onAdd", track);
-    if (!playlistTracks.includes(track)) {
-      setPlaylistTracks((prevTracks) => [...prevTracks, track]);
+    setPlaylistTracks((prevTracks) => {
+      if (prevTracks.find((t) => t.id === track.id)) {
+        return prevTracks;
+      }
+      return [...prevTracks, track];
     }
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
