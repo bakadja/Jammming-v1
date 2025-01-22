@@ -14,7 +14,7 @@ const style = {
   backgroundColor: "background.paper",
 };
 
-function Tracklist({ tracks = [], onAdd, actionIcon = "add" , title}) {
+function Tracklist({ tracks = [], onAdd, actionIcon = "add" , title, isTrackInPlaylist }) {
   return (
     <List sx={style}>
       {tracks.map((track) => (
@@ -24,6 +24,7 @@ function Tracklist({ tracks = [], onAdd, actionIcon = "add" , title}) {
             onAdd={onAdd}
             actionIcon={actionIcon}
             title={title}
+            isTrackInPlaylist={isTrackInPlaylist}
           />
           <Divider />
         </div>

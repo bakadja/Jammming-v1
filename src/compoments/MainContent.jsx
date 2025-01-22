@@ -8,7 +8,7 @@ import { tracks } from "./tracks";
 
 function MainContent() {
   const [playlistTracks, setPlaylistTracks] = React.useState([]);
-  console.log("tracks:", tracks.length);
+  const [playlistName, setPlaylistName] = React.useState("");
 
   const addTrack = React.useCallback((track) => {
     setPlaylistTracks((prevTracks) => {
@@ -16,8 +16,7 @@ function MainContent() {
         return prevTracks;
       }
       return [...prevTracks, track];
-    }
-    );
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -27,6 +26,42 @@ function MainContent() {
       prevTracks.filter((t) => t.id !== track.id)
     );
   }, []);
+
+  const isTrackInPlaylist = React.useCallback(
+    (trackId) => {
+      return playlistTracks.some((t) => t.id === trackId);
+    },
+    [playlistTracks]
+  );
+
+  const handleNameChange = React.useCallback((newName) => {
+    setPlaylistName(newName);
+  }, []);
+
+  const handleSave = React.useCallback(() => {
+    if (!playlistTracks.length) {
+      console.warn("La playlist doit contenir au moins une piste");
+      return;
+    }
+    // const tracks = playlistTracks.map((track) => ({
+    //   id: track.id,
+    //   uri: track.uri,
+    //   name: track.name,
+    //   artist: track.artists[0].name,
+    //   album: track.album.name,
+    // }));
+
+    const playlistData = {
+      name: playlistName,
+      tracks: [...playlistTracks],
+    };
+
+    console.log("Sauvegarde de la playlist:", playlistData);
+
+    // Réinitialiser après sauvegarde
+    setPlaylistName("");
+    setPlaylistTracks([]);
+  }, [playlistName, playlistTracks]);
 
   return (
     <>
@@ -54,10 +89,20 @@ function MainContent() {
         <Box sx={{ flexGrow: 1, marginTop: "3rem" }}>
           <Grid2 container spacing={2}>
             <Grid2 size={{ xs: 12, md: 6 }}>
-              <SearchResults tracks={tracks} onAdd={addTrack} />
+              <SearchResults
+                tracks={tracks}
+                onAdd={addTrack}
+                isTrackInPlaylist={isTrackInPlaylist}
+              />
             </Grid2>
             <Grid2 size={{ xs: 12, md: 6 }}>
-              <Playlist playlistTracks={playlistTracks} onRemove={removeTrack} />{" "}
+              <Playlist
+                playlistName={playlistName}
+                onNameChange={handleNameChange}
+                playlistTracks={playlistTracks}
+                onRemove={removeTrack}
+                onSave={handleSave}
+              />
             </Grid2>
           </Grid2>
         </Box>

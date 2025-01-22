@@ -3,7 +3,7 @@ import React from "react";
 import Tracklist from "./ui/Tracklist";
 import { Typography, Box } from "@mui/material";
 
-const SearchResults = React.memo(function SearchResults({ tracks = [], onAdd }) {
+const SearchResults = React.memo(function SearchResults({ tracks = [], onAdd, isTrackInPlaylist }) {
   return (
     <Box
       sx={{
@@ -21,7 +21,7 @@ const SearchResults = React.memo(function SearchResults({ tracks = [], onAdd }) 
       >
         Results
       </Typography>
-      <Tracklist tracks={tracks} title="add to playlist" onAdd={onAdd} />
+      <Tracklist tracks={tracks} title="add to playlist" onAdd={onAdd} isTrackInPlaylist={isTrackInPlaylist}/>
     </Box>
   );
 });

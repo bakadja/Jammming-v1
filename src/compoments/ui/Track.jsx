@@ -10,7 +10,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 
-function Track({ track, onAdd, actionIcon, title }) {
+function Track({ track, onAdd, actionIcon, title, isTrackInPlaylist }) {
   const ActionIcon = actionIcon === "add" ? AddIcon : RemoveIcon;
 
   // Accéder aux données correctement depuis la structure de tracks
@@ -21,7 +21,12 @@ function Track({ track, onAdd, actionIcon, title }) {
     <ListItem
       key={track.id}
       secondaryAction={
-        <IconButton title={title} edge="end" onClick={() => onAdd(track)}>
+        <IconButton
+          title={title}
+          edge="end"
+          onClick={() => onAdd(track)}
+          disabled={isTrackInPlaylist?.(track.id)}
+        >
           <ActionIcon />
         </IconButton>
       }
