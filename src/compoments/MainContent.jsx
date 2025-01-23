@@ -5,10 +5,22 @@ import Playlist from "./Playlist";
 import SearchResults from "./SearchResults";
 import SearchBar from "./SearchBar";
 import { tracks } from "./tracks";
+import { savePlaylist, getPlaylists, deletePlaylist, updatePlaylist } from '../services/dbservice';
 
 function MainContent() {
   const [playlistTracks, setPlaylistTracks] = React.useState([]);
   const [playlistName, setPlaylistName] = React.useState("");
+  const [savedPlaylists, setSavedPlaylists] = React.useState([]);
+  const [editingPlaylist, setEditingPlaylist] = React.useState(null);
+
+  // Charger les playlists au montage
+  React.useEffect(() => {
+    const loadPlaylists = async () => {
+      const playlists = await getPlaylists();
+      setSavedPlaylists(playlists);
+    };
+    loadPlaylists();
+  }, []);
 
   const addTrack = React.useCallback((track) => {
     setPlaylistTracks((prevTracks) => {
@@ -38,30 +50,72 @@ function MainContent() {
     setPlaylistName(newName);
   }, []);
 
-  const handleSave = React.useCallback(() => {
+  // Modifier handleSave pour utiliser dbService
+  const handleSave = React.useCallback(async () => {
     if (!playlistTracks.length) {
       console.warn("La playlist doit contenir au moins une piste");
       return;
     }
-    // const tracks = playlistTracks.map((track) => ({
-    //   id: track.id,
-    //   uri: track.uri,
-    //   name: track.name,
-    //   artist: track.artists[0].name,
-    //   album: track.album.name,
-    // }));
+
+    const playlistData = {
+      name: playlistName,
+      tracks: [...playlistTracks],
+    };
+const uris = playlistData.tracks.map(track => track.uri);
+    const saved = await savePlaylist(playlistData);
+    if (saved) {
+      // Mettre à jour savedPlaylists
+      setSavedPlaylists(prev => [...prev, playlistData]);
+      // Réinitialiser
+      setPlaylistName("");
+      setPlaylistTracks([]);
+    }
+  }, [playlistName, playlistTracks]);
+
+  // Ajouter fonction de suppression
+  const handleDelete = React.useCallback(async (name) => {
+    const deleted = await deletePlaylist(name);
+    if (deleted) {
+      setSavedPlaylists(prev => prev.filter(p => p.name !== name));
+    }
+  }, []);
+
+  const handleEdit = React.useCallback((playlist) => {
+    setEditingPlaylist(playlist);
+    setPlaylistName(playlist.name);
+    setPlaylistTracks(playlist.tracks);
+  }, []);
+
+  const handleUpdate = React.useCallback(async () => {
+    if (!playlistTracks.length || !editingPlaylist) {
+      return;
+    }
 
     const playlistData = {
       name: playlistName,
       tracks: [...playlistTracks],
     };
 
-    console.log("Sauvegarde de la playlist:", playlistData);
+    const updated = await updatePlaylist(editingPlaylist.name, playlistData);
+    if (updated) {
+      setSavedPlaylists(prev => 
+        prev.map(p => p.name === editingPlaylist.name ? playlistData : p)
+      );
+      setEditingPlaylist(null);
+      setPlaylistName("");
+      setPlaylistTracks([]);
+    }
+  }, [playlistName, playlistTracks, editingPlaylist]);
 
-    // Réinitialiser après sauvegarde
+  const handleCancel = React.useCallback(() => {
+    setEditingPlaylist(null);
     setPlaylistName("");
     setPlaylistTracks([]);
-  }, [playlistName, playlistTracks]);
+  }, []);
+
+  React.useEffect(() => {
+    console.log("playlistTracks", playlistTracks);
+  }, [playlistTracks,]);
 
   return (
     <>
@@ -101,7 +155,12 @@ function MainContent() {
                 onNameChange={handleNameChange}
                 playlistTracks={playlistTracks}
                 onRemove={removeTrack}
-                onSave={handleSave}
+                onSave={editingPlaylist ? handleUpdate : handleSave}
+                onCancel={handleCancel}
+                savedPlaylists={savedPlaylists}
+                onDelete={handleDelete}
+                onEdit={handleEdit}
+                editingPlaylist={editingPlaylist}
               />
             </Grid2>
           </Grid2>
