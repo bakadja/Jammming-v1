@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Container, AppBar, Typography } from "@mui/material";
+import { Box, Container, AppBar, Typography, Button } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import Playlist from "./Playlist";
 import SearchResults from "./SearchResults";
@@ -12,6 +12,8 @@ import {
   updatePlaylist,
 } from "../services/dbservice";
 import { useAuth } from "../hooks/useAuth";
+import Login from "./ui/Login";
+import LogoutIcon from "@mui/icons-material/Logout";
 
 function MainContent() {
   const [playlistTracks, setPlaylistTracks] = React.useState([]);
@@ -20,6 +22,8 @@ function MainContent() {
   const [editingPlaylist, setEditingPlaylist] = React.useState(null);
 
   const { token, loading, error, login, logout } = useAuth();
+
+  //TODO: GERER LE CAS LOADING ET ERROR et crrer un button login et logout
 
   // Charger les playlists au montage
   React.useEffect(() => {
@@ -125,14 +129,36 @@ function MainContent() {
     console.log("playlistTracks", playlistTracks);
   }, [playlistTracks]);
 
-  return (
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
+
+  return !token ? (
+    <Login onLogin={login} />
+  ) : (
     <>
       {/* Header */}
       <AppBar position="static" component="header">
         <Container maxWidth="lg">
-          <Typography variant="h4" component="h1" sx={{ py: 2 }}>
-            Jammming
-          </Typography>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              py: 2,
+            }}
+          >
+            <Typography variant="h4" component="h1">
+              Jammming
+            </Typography>
+            <Button color="inherit" onClick={logout} startIcon={<LogoutIcon />}>
+              Déconnexion
+            </Button>
+          </Box>
         </Container>
       </AppBar>
 

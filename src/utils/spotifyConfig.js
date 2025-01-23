@@ -5,3 +5,5 @@ export const spotifyConfig = {
   tokenEndpoint: import.meta.env.VITE_SPOTIFY_TOKEN_ENDPOINT,
   scope: import.meta.env.VITE_SPOTIFY_SCOPE,
 };
+
+

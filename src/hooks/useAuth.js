@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { spotifyConfig } from "../utils/spotifyConfig";
-import { spotifyService } from "../services/spotifyService";
+import { authService } from "../services/authService";
 
 export const useAuth = () => {
   const [token, setToken] = useState(null);
@@ -8,20 +8,48 @@ export const useAuth = () => {
   const [error, setError] = useState(null);
   const refreshTimeoutRef = useRef(null);
 
-  const login = useCallback(() => {
-    const scope = "user-read-private playlist-modify-public";
-    const args = new URLSearchParams({
-      response_type: "code",
-      client_id: spotifyConfig.clientId,
-      scope: scope,
-      redirect_uri: spotifyConfig.redirectUrl,
-    });
-    window.location = `https://accounts.spotify.com/authorize?${args}`;
+  const login = useCallback(async () => {
+     try {
+      const possible =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+      const randomValues = crypto.getRandomValues(new Uint8Array(64));
+      const randomString = randomValues.reduce(
+        (acc, x) => acc + possible[x % possible.length],
+        ""
+      );
+
+      const codeVerifier = randomString;
+      const data = new TextEncoder().encode(codeVerifier);
+      const hashed = await crypto.subtle.digest("SHA-256", data);
+
+      const codeChallenge = btoa(String.fromCharCode(...new Uint8Array(hashed)))
+        .replace(/=/g, "")
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_");
+
+      localStorage.setItem("code_verifier", codeVerifier);
+
+      const authUrl = new URL(spotifyConfig.authorizationEndpoint);
+      const params = {
+        response_type: "code",
+        client_id: spotifyConfig.clientId,
+        scope: spotifyConfig.scope,
+        code_challenge_method: "S256",
+        code_challenge: codeChallenge,
+        redirect_uri: spotifyConfig.redirectUrl,
+      };
+
+      authUrl.search = new URLSearchParams(params).toString();
+      window.location.href = authUrl.toString();
+    } catch (err) {
+      setError(err);
+    }
   }, []);
 
   const logout = useCallback(() => {
     setToken(null);
     localStorage.removeItem("spotify_token");
+    localStorage.removeItem("code_verifier");
     if (refreshTimeoutRef.current) {
       clearTimeout(refreshTimeoutRef.current);
     }
@@ -30,7 +58,7 @@ export const useAuth = () => {
   const scheduleTokenRefresh = useCallback((refreshToken) => {
     refreshTimeoutRef.current = setTimeout(async () => {
       try {
-        const newToken = await spotifyService.refreshToken(refreshToken);
+        const newToken = await authService.refreshToken(refreshToken);
         setToken(newToken);
         localStorage.setItem("spotify_token", JSON.stringify(newToken));
         scheduleTokenRefresh(newToken.refresh_token);
@@ -47,7 +75,7 @@ export const useAuth = () => {
         const code = args.get("code");
 
         if (code) {
-          const tokenResponse = await spotifyService.getToken(code);
+          const tokenResponse = await authService.getToken(code);
           setToken(tokenResponse);
           localStorage.setItem("spotify_token", JSON.stringify(tokenResponse));
           window.history.replaceState({}, document.title, "/");
@@ -68,11 +96,5 @@ export const useAuth = () => {
     };
   }, [scheduleTokenRefresh]);
 
-  return {
-    token,
-    loading,
-    error,
-    login,
-    logout,
-  };
+  return { token, loading, error, login, logout };
 };

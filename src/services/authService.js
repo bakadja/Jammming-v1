@@ -1,4 +1,5 @@
 import { spotifyConfig } from "../utils/spotifyConfig";
+console.log("spotifyConfig", spotifyConfig);
 
 /**
  * Service for handling Spotify API authentication and user data retrieval
