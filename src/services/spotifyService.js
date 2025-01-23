@@ -37,5 +37,64 @@ export const createSpotifyService = (token) => {
         throw error;
       }
     },
+    
+    async getUserData() {
+      try {
+        const response = await fetch('https://api.spotify.com/v1/me', {
+          method: 'GET',
+          headers,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to get user data: ${response.status}`);
+        }
+
+        return await response.json();
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        throw error;
+      }
+    },
+    
+    async createPlaylist(name, tracks) {
+      try {
+        // Créer une playlist vide
+        const userId = await this.getUserData().then(data => data.id);
+        const createResponse = await fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            name,
+            description: 'Created with Jammming',
+            public: true
+          })
+        });
+
+        if (!createResponse.ok) {
+          throw new Error(`Failed to create playlist: ${createResponse.status}`);
+        }
+
+        const playlist = await createResponse.json();
+
+        // Ajouter les tracks à la playlist
+        const trackUris = tracks.map(track => track.uri);
+        const addTracksResponse = await fetch(`https://api.spotify.com/v1/playlists/${playlist.id}/tracks`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            uris: trackUris
+          })
+        });
+
+        if (!addTracksResponse.ok) {
+          throw new Error(`Failed to add tracks: ${addTracksResponse.status}`);
+        }
+
+        return playlist;
+      } catch (error) {
+        console.error('Error creating playlist:', error);
+        throw error;
+      }
+    },
   };
 };

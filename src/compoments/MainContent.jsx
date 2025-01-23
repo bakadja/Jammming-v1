@@ -22,7 +22,8 @@ import Login from "./ui/Login";
 import Loading from "./ui/Loading";
 import ErrorPage from "./ui/ErrorPage";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { createSpotifyService } from "../services/spotifyService";
+import { useSearch } from "../hooks/useSearch";
+import { usePlaylist } from "../hooks/usePlaylist";
 
 
 //TODO: add a license code 
@@ -31,15 +32,11 @@ function MainContent() {
   const [playlistName, setPlaylistName] = React.useState("");
   const [savedPlaylists, setSavedPlaylists] = React.useState([]);
   const [editingPlaylist, setEditingPlaylist] = React.useState(null);
-  const [searchResults, setSearchResults] = React.useState([]);
+  const { token, loading, error, login, logout, getUserData, userData } = useAuth();
+  const { searchResults, searchTracks } = useSearch(token);
+  const { createNewPlaylist, isCreating, error: playlistError } = usePlaylist(token);
 
-  const { token, loading, error, login, logout } = useAuth();
-
-  const spotifyService = React.useMemo(
-    () => createSpotifyService(token),
-    [token]
-  );
-
+  console.log("userData", userData);
   // Charger les playlists au montage
   React.useEffect(() => {
     const loadPlaylists = async () => {
@@ -48,6 +45,17 @@ function MainContent() {
     };
     loadPlaylists();
   }, []);
+
+  // Ajout de l'effet pour charger les données utilisateur
+  React.useEffect(() => {
+    const loadUserData = async () => {
+      if (token) {
+        await getUserData();
+      }
+    };
+    
+    loadUserData();
+  }, [token, getUserData]);
 
   const addTrack = React.useCallback((track) => {
     setPlaylistTracks((prevTracks) => {
@@ -77,27 +85,29 @@ function MainContent() {
     setPlaylistName(newName);
   }, []);
 
-  // Modifier handleSave pour utiliser dbService
+  // Modifier handleSave pour utiliser createNewPlaylist
   const handleSave = React.useCallback(async () => {
     if (!playlistTracks.length) {
       console.warn("La playlist doit contenir au moins une piste");
       return;
     }
 
-    const playlistData = {
-      name: playlistName,
-      tracks: [...playlistTracks],
-    };
-    const uris = playlistData.tracks.map((track) => track.uri);
-    const saved = await savePlaylist(playlistData);
-    if (saved) {
-      // Mettre à jour savedPlaylists
-      setSavedPlaylists((prev) => [...prev, playlistData]);
-      // Réinitialiser
-      setPlaylistName("");
-      setPlaylistTracks([]);
+    try {
+      const playlist = await createNewPlaylist(playlistName, playlistTracks);
+      if (playlist) {
+        const playlistData = {
+          name: playlistName,
+          tracks: [...playlistTracks],
+        };
+        await savePlaylist(playlistData);
+        setSavedPlaylists((prev) => [...prev, playlistData]);
+        setPlaylistName("");
+        setPlaylistTracks([]);
+      }
+    } catch (error) {
+      console.error("Erreur lors de la création de la playlist:", error);
     }
-  }, [playlistName, playlistTracks]);
+  }, [playlistName, playlistTracks, createNewPlaylist]);
 
   // Ajouter fonction de suppression
   const handleDelete = React.useCallback(async (name) => {
@@ -140,21 +150,25 @@ function MainContent() {
     setPlaylistTracks([]);
   }, []);
 
-   const handleSearch = React.useCallback(
-     async (searchTerm) => {
-       try {
-         const tracks = await spotifyService.searchTracks(searchTerm);
-         setSearchResults(tracks);
-       } catch (error) {
-         console.error("Search failed:", error);
-       }
-     },
-     [spotifyService]
-   );
+  const handleSearch = React.useCallback(
+    async (searchTerm) => {
+      try {
+        await searchTracks(searchTerm);
+      } catch (error) {
+        console.error("Search failed:", error);
+      }
+    },
+    [searchTracks]
+  );
 
   React.useEffect(() => {
     console.log("playlistTracks", playlistTracks);
   }, [playlistTracks]);
+
+  // Ajouter la gestion des erreurs dans le rendu
+  if (playlistError) {
+    console.error("Erreur playlist:", playlistError);
+  }
 
   if (loading) {
     return <Loading />;
@@ -180,7 +194,7 @@ function MainContent() {
             }}
           >
             <Typography variant="h4" component="h1">
-              Jammming
+              Jammming {userData && `- ${userData.display_name}`}
             </Typography>
             <Button color="inherit" onClick={logout} startIcon={<LogoutIcon />}>
               Déconnexion

@@ -64,7 +64,7 @@ function Playlist({ savedPlaylists, ...props }) {
           onClick={props.onSave}
           disabled={!props.playlistTracks.length || !props.playlistName}
         >
-          {props.editingPlaylist ? "Mettre à jour" : "Sauvegarder"}
+          {props.editingPlaylist ? "Mettre à jour" : "Save To Spotify"}
         </Button>
 
         {props.editingPlaylist && (

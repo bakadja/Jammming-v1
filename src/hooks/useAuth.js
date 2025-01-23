@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { spotifyConfig } from "../utils/spotifyConfig";
 import { authService } from "../services/authService";
+import { createSpotifyService } from "../services/spotifyService";
 
 export const useAuth = () => {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [userData, setUserData] = useState(null);
   const refreshTimeoutRef = useRef(null);
   useEffect(() => {
     console.log('Current token:', token);
@@ -70,6 +72,19 @@ export const useAuth = () => {
     }, 2700 * 1000);
   }, []);
 
+  const getUserData = useCallback(async () => {
+    if (!token) return null;
+    try {
+      const spotifyService = createSpotifyService(token);
+      const data = await spotifyService.getUserData();
+      setUserData(data);
+      return data;
+    } catch (err) {
+      setError(err);
+      return null;
+    }
+  }, [token]);
+
   useEffect(() => {
     const initializeAuth = async () => {
       try {
@@ -98,5 +113,5 @@ export const useAuth = () => {
     };
   }, [scheduleTokenRefresh]);
 
-  return { token, loading, error, login, logout };
+  return { token, loading, error, login, logout, getUserData, userData };
 };
