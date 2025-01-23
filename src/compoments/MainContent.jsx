@@ -5,13 +5,21 @@ import Playlist from "./Playlist";
 import SearchResults from "./SearchResults";
 import SearchBar from "./SearchBar";
 import { tracks } from "./tracks";
-import { savePlaylist, getPlaylists, deletePlaylist, updatePlaylist } from '../services/dbservice';
+import {
+  savePlaylist,
+  getPlaylists,
+  deletePlaylist,
+  updatePlaylist,
+} from "../services/dbservice";
+import { useAuth } from "../hooks/useAuth";
 
 function MainContent() {
   const [playlistTracks, setPlaylistTracks] = React.useState([]);
   const [playlistName, setPlaylistName] = React.useState("");
   const [savedPlaylists, setSavedPlaylists] = React.useState([]);
   const [editingPlaylist, setEditingPlaylist] = React.useState(null);
+
+  const { token, loading, error, login, logout } = useAuth();
 
   // Charger les playlists au montage
   React.useEffect(() => {
@@ -61,11 +69,11 @@ function MainContent() {
       name: playlistName,
       tracks: [...playlistTracks],
     };
-const uris = playlistData.tracks.map(track => track.uri);
+    const uris = playlistData.tracks.map((track) => track.uri);
     const saved = await savePlaylist(playlistData);
     if (saved) {
       // Mettre à jour savedPlaylists
-      setSavedPlaylists(prev => [...prev, playlistData]);
+      setSavedPlaylists((prev) => [...prev, playlistData]);
       // Réinitialiser
       setPlaylistName("");
       setPlaylistTracks([]);
@@ -76,7 +84,7 @@ const uris = playlistData.tracks.map(track => track.uri);
   const handleDelete = React.useCallback(async (name) => {
     const deleted = await deletePlaylist(name);
     if (deleted) {
-      setSavedPlaylists(prev => prev.filter(p => p.name !== name));
+      setSavedPlaylists((prev) => prev.filter((p) => p.name !== name));
     }
   }, []);
 
@@ -98,8 +106,8 @@ const uris = playlistData.tracks.map(track => track.uri);
 
     const updated = await updatePlaylist(editingPlaylist.name, playlistData);
     if (updated) {
-      setSavedPlaylists(prev => 
-        prev.map(p => p.name === editingPlaylist.name ? playlistData : p)
+      setSavedPlaylists((prev) =>
+        prev.map((p) => (p.name === editingPlaylist.name ? playlistData : p))
       );
       setEditingPlaylist(null);
       setPlaylistName("");
@@ -115,7 +123,7 @@ const uris = playlistData.tracks.map(track => track.uri);
 
   React.useEffect(() => {
     console.log("playlistTracks", playlistTracks);
-  }, [playlistTracks,]);
+  }, [playlistTracks]);
 
   return (
     <>
