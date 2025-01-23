@@ -1,5 +1,11 @@
 import React from "react";
-import { Box, Container, AppBar, Typography, Button } from "@mui/material";
+import {
+  Box,
+  Container,
+  AppBar,
+  Typography,
+  Button,
+} from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import Playlist from "./Playlist";
 import SearchResults from "./SearchResults";
@@ -13,17 +19,26 @@ import {
 } from "../services/dbservice";
 import { useAuth } from "../hooks/useAuth";
 import Login from "./ui/Login";
+import Loading from "./ui/Loading";
+import ErrorPage from "./ui/ErrorPage";
 import LogoutIcon from "@mui/icons-material/Logout";
+import { createSpotifyService } from "../services/spotifyService";
 
+
+//TODO: add a license code 
 function MainContent() {
   const [playlistTracks, setPlaylistTracks] = React.useState([]);
   const [playlistName, setPlaylistName] = React.useState("");
   const [savedPlaylists, setSavedPlaylists] = React.useState([]);
   const [editingPlaylist, setEditingPlaylist] = React.useState(null);
+  const [searchResults, setSearchResults] = React.useState([]);
 
   const { token, loading, error, login, logout } = useAuth();
 
-  //TODO: GERER LE CAS LOADING ET ERROR et crrer un button login et logout
+  const spotifyService = React.useMemo(
+    () => createSpotifyService(token),
+    [token]
+  );
 
   // Charger les playlists au montage
   React.useEffect(() => {
@@ -125,16 +140,28 @@ function MainContent() {
     setPlaylistTracks([]);
   }, []);
 
+   const handleSearch = React.useCallback(
+     async (searchTerm) => {
+       try {
+         const tracks = await spotifyService.searchTracks(searchTerm);
+         setSearchResults(tracks);
+       } catch (error) {
+         console.error("Search failed:", error);
+       }
+     },
+     [spotifyService]
+   );
+
   React.useEffect(() => {
     console.log("playlistTracks", playlistTracks);
   }, [playlistTracks]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   if (error) {
-    return <div>Error: {error.message}</div>;
+    return <ErrorPage error={error} />;
   }
 
   return !token ? (
@@ -173,12 +200,13 @@ function MainContent() {
         }}
       >
         {/* Ici viendront vos composants SearchBar, SearchResults et Playlist */}
-        <SearchBar />
+        <SearchBar onSearch={handleSearch} />
         <Box sx={{ flexGrow: 1, marginTop: "3rem" }}>
           <Grid2 container spacing={2}>
             <Grid2 size={{ xs: 12, md: 6 }}>
               <SearchResults
-                tracks={tracks}
+                // tracks={tracks}
+                tracks={searchResults}
                 onAdd={addTrack}
                 isTrackInPlaylist={isTrackInPlaylist}
               />

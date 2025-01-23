@@ -1,6 +1,4 @@
 /* eslint-disable react/prop-types */
-import React from "react";
-
 const Login = ({ onLogin }) => {
   return (
     <div className="login-container">

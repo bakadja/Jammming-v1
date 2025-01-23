@@ -5,9 +5,11 @@ import { authService } from "../services/authService";
 export const useAuth = () => {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(false);
   const refreshTimeoutRef = useRef(null);
-
+  useEffect(() => {
+    console.log('Current token:', token);
+  }, [token]);
   const login = useCallback(async () => {
      try {
       const possible =
